@@ -1,6 +1,7 @@
 dependencies:
   apollo-server: 2.14.1_graphql@15.0.0
   graphql: 15.0.0
+  uuid: 8.1.0
 devDependencies:
   nodemon: 2.0.4
 lockfileVersion: 5.1
@@ -2124,3 +2125,4 @@ specifiers:
   apollo-server: ^2.14.1
   graphql: ^15.0.0
   nodemon: ^2.0.4
+  uuid: ^8.1.0
