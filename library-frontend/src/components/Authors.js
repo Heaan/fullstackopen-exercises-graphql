@@ -47,10 +47,15 @@ const Authors = (props) => {
       </table>
       <h2>Set birthyear</h2>
       <form onSubmit={submit}>
-        <div>
+        {/* <div>
           name
           <input type="text" value={name} onChange={({ target }) => setName(target.value)} />
-        </div>
+        </div> */}
+        <select value={name} onChange={({ target }) => setName(target.value)}>
+          {authors.map((author) => (
+            <option value={author.name}>{author.name}</option>
+          ))}
+        </select>
         <div>
           born
           <input type="number" value={born} onChange={({ target }) => setBorn(target.value)} />
