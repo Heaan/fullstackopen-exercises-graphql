@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-const { ApolloServer, gql } = require('apollo-server');
+const { ApolloServer, gql, UserInputError } = require('apollo-server');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -162,11 +162,23 @@ const resolvers = {
       let author = await Author.findOne({ name: args.author });
       if (!author) {
         author = new Author({ name: args.author });
-        author = await author.save();
+        try {
+          author = await author.save();
+        } catch (err) {
+          throw new UserInputError(err.message, {
+            invalidArgs: args,
+          });
+        }
       }
       const book = new Book({ ...args, author: author._id });
-      await book.save();
-      return book;
+      try {
+        await book.save();
+      } catch (err) {
+        throw new UserInputError(err.message, {
+          invalidArgs: args,
+        });
+      }
+      return Book.findById(book._id).populate('author');
     },
     editAuthor: async (root, args) => {
       const author = await Author.findOne({ name: args.name });
@@ -174,7 +186,13 @@ const resolvers = {
         return null;
       }
       author.born = args.setBornTo;
-      await author.save();
+      try {
+        await author.save();
+      } catch (err) {
+        throw new UserInputError(err.message, {
+          invalidArgs: args,
+        });
+      }
       return author;
     },
   },
