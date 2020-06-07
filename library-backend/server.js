@@ -13,7 +13,7 @@ const { MONGODB_URI } = process.env;
 console.log('connecting to', MONGODB_URI);
 
 mongoose
-  .connect(MONGODB_URI, { useNewUrlParser: true })
+  .connect(MONGODB_URI, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true })
   .then(() => {
     console.log('connected to MongoDB');
   })
@@ -159,18 +159,23 @@ const resolvers = {
       if (!authors.find((author) => author.name === args.author)) {
         authors = authors.concat({ name: args.author, id: uuid() });
       }
-      const book = new Book({ ...args });
+      let author = await Author.findOne({ name: args.author });
+      if (!author) {
+        author = new Author({ name: args.author });
+        author = await author.save();
+      }
+      const book = new Book({ ...args, author: author._id });
       await book.save();
       return book;
     },
-    editAuthor: (root, args) => {
-      const target = authors.find((author) => author.name === args.name);
-      if (!target) {
+    editAuthor: async (root, args) => {
+      const author = await Author.findOne({ name: args.name });
+      if (!author) {
         return null;
       }
-      const updated = { ...target, born: args.setBornTo };
-      authors = authors.map((author) => (author.name === updated.name ? updated : author));
-      return updated;
+      author.born = args.setBornTo;
+      await author.save();
+      return author;
     },
   },
 };
