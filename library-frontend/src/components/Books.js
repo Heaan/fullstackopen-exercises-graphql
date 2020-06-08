@@ -4,7 +4,9 @@ import { ALL_BOOKS } from '../queries';
 
 const Books = (props) => {
   const [genre, setGenre] = useState('ALL');
-  const result = useQuery(ALL_BOOKS);
+  const result = useQuery(ALL_BOOKS, {
+    variables: { author: '', genre: '' },
+  });
 
   if (!props.show) {
     return null;
@@ -16,7 +18,7 @@ const Books = (props) => {
 
   const books = result.data.allBooks;
   const genres = [...new Set(books.map((book) => book.genres).flat())];
-  const booksToView = genre !== 'ALL' ? books.filter((book) => book.genres.includes(genre)) : books;
+  const bookToView = genre === 'ALL' ? books : books.filter((book) => book.genres.includes(genre));
   const style = {
     borderColor: 'black',
   };
@@ -24,15 +26,16 @@ const Books = (props) => {
   return (
     <div>
       <h2>books</h2>
-
       <table>
-        <tbody>
+        <thead>
           <tr>
-            <th></th>
-            <th>author</th>
-            <th>published</th>
+            <td></td>
+            <td>author</td>
+            <td>published</td>
           </tr>
-          {booksToView.map((book) => (
+        </thead>
+        <tbody>
+          {bookToView.map((book) => (
             <tr key={book.id}>
               <td>{book.title}</td>
               <td>{book.author.name}</td>
