@@ -1,18 +1,6 @@
 import React from 'react';
-import { useQuery } from '@apollo/client';
-import { ALL_BOOKS } from '../queries';
 
-const BookTable = ({ variables }) => {
-  const result = useQuery(ALL_BOOKS, {
-    variables,
-  });
-
-  if (result.loading) {
-    return <div>Loading...</div>;
-  }
-
-  const books = result.data?.allBooks || [];
-
+const BookTable = ({ books }) => {
   return (
     <table>
       <thead>

@@ -1,24 +1,33 @@
-import React, { useState } from 'react';
-import { useQuery } from '@apollo/client';
+import React, { useState, useEffect } from 'react';
+import { useLazyQuery } from '@apollo/client';
 import { ALL_BOOKS } from '../queries';
+import BookTable from './BookTable';
 
-const Books = (props) => {
-  const [genre, setGenre] = useState('ALL');
-  const result = useQuery(ALL_BOOKS, {
-    variables: { author: '', genre: '' },
-  });
+const Books = ({ show }) => {
+  const [books, setBooks] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [genre, setGenre] = useState('');
+  const [allBooks, { called, loading, data }] = useLazyQuery(ALL_BOOKS);
 
-  if (!props.show) {
+  useEffect(() => {
+    if (show) {
+      allBooks({ variables: { author: '', genre } });
+    }
+  }, [show, genre]);
+
+  useEffect(() => {
+    if (data) {
+      setBooks(data.allBooks);
+      if (tags.length === 0) {
+        setTags([...new Set(data.allBooks.map((book) => book.genres).flat())]);
+      }
+    }
+  }, [data]);
+
+  if (!show) {
     return null;
   }
 
-  if (result.loading) {
-    return <div>Loading...</div>;
-  }
-
-  const books = result.data.allBooks;
-  const genres = [...new Set(books.map((book) => book.genres).flat())];
-  const bookToView = genre === 'ALL' ? books : books.filter((book) => book.genres.includes(genre));
   const style = {
     borderColor: 'black',
   };
@@ -26,43 +35,35 @@ const Books = (props) => {
   return (
     <div>
       <h2>books</h2>
-      <table>
-        <thead>
-          <tr>
-            <td></td>
-            <td>author</td>
-            <td>published</td>
-          </tr>
-        </thead>
-        <tbody>
-          {bookToView.map((book) => (
-            <tr key={book.id}>
-              <td>{book.title}</td>
-              <td>{book.author.name}</td>
-              <td>{book.published}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div>
-        <button
-          style={genre === 'ALL' ? style : null}
-          type="button"
-          onClick={() => setGenre('ALL')}
-        >
-          all
-        </button>
-        {genres.map((g) => (
-          <button
-            style={genre === g ? style : null}
-            type="button"
-            onClick={() => setGenre(g)}
-            key={g}
-          >
-            {g}
-          </button>
-        ))}
-      </div>
+      {called && loading ? (
+        <div>Loading...</div>
+      ) : (
+        <>
+          <div>
+            in genre <strong>{genre.length === 0 ? 'all genres' : genre}</strong>
+          </div>
+          <BookTable books={books} />
+          <div>
+            {tags.map((tag) => (
+              <button
+                style={genre === tag ? style : null}
+                type="button"
+                onClick={() => setGenre(tag)}
+                key={tag}
+              >
+                {tag}
+              </button>
+            ))}
+            <button
+              style={genre.length === 0 ? style : null}
+              type="button"
+              onClick={() => setGenre('')}
+            >
+              all genres
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
