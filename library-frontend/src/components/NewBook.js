@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { ADD_BOOK, ALL_BOOKS, ALL_AUTHORS } from '../queries';
+import { useCacheUpdate } from '../hooks/index';
 
 const NewBook = (props) => {
   const [title, setTitle] = useState('');
@@ -8,22 +9,23 @@ const NewBook = (props) => {
   const [published, setPublished] = useState('');
   const [genre, setGenre] = useState('');
   const [genres, setGenres] = useState([]);
+  const updateBookCacheWith = useCacheUpdate(ALL_BOOKS);
+  const updateAuthorCacheWith = useCacheUpdate(ALL_AUTHORS);
   const [createBook] = useMutation(ADD_BOOK, {
+    onError: (err) => {
+      console.error(err.graphQLErrors[0].message);
+    },
     update: (store, { data: { addBook } }) => {
       const genres = [...addBook.genres, ''];
+      const author = addBook.author;
+      updateAuthorCacheWith(author, 'allAuthors');
       genres.forEach((genre) => {
         try {
-          const dataInStore = store.readQuery({
-            query: ALL_BOOKS,
-            variables: { author: '', genre },
-          });
-          store.writeQuery({
-            query: ALL_BOOKS,
-            variables: { author: '', genre },
-            data: { ...dataInStore, allBooks: [...dataInStore.allBooks, addBook] },
-          });
-        } catch {
-          console.log('not in cache');
+          updateBookCacheWith(addBook, 'allBooks', { author: '', genre });
+        } catch (err) {
+          if (!err.message.startsWith(`Can't find field`)) {
+            console.error(err.message);
+          }
         }
       });
     },

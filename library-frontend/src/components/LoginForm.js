@@ -5,7 +5,11 @@ import { LOGIN, ME } from '../queries';
 const LoginForm = ({ show, setToken, setPage }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [login, result] = useMutation(LOGIN);
+  const [login, result] = useMutation(LOGIN, {
+    onError: (err) => {
+      console.error(err.graphQLErrors[0].message);
+    },
+  });
   // for refetch the cache
   const [me] = useLazyQuery(ME, { fetchPolicy: 'network-only' });
 
@@ -16,7 +20,7 @@ const LoginForm = ({ show, setToken, setPage }) => {
       localStorage.setItem('library-user-token', token);
       me();
     }
-  }, [result.data, setToken]);
+  }, [result.data, setToken]); // eslint-disable-line
 
   if (!show) {
     return null;

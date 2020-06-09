@@ -12,7 +12,7 @@ const Recommendations = ({ show }) => {
     if (show) {
       me();
     }
-  }, [show]);
+  }, [show]); // eslint-disable-line
 
   useEffect(() => {
     if (user.data) {
@@ -24,7 +24,7 @@ const Recommendations = ({ show }) => {
     if (genre) {
       allBooks({ variables: { author: '', genre } });
     }
-  }, [genre]);
+  }, [genre]); // eslint-disable-line
 
   if (!show) {
     return null;

@@ -5,16 +5,31 @@ import Books from './components/Books';
 import NewBook from './components/NewBook';
 import LoginForm from './components/LoginForm';
 import Recommendations from './components/Recommendations';
-import { BOOK_ADDED } from './queries';
+import { BOOK_ADDED, ALL_BOOKS, ALL_AUTHORS } from './queries';
+import { useCacheUpdate } from './hooks/index';
 
 const App = () => {
   const [page, setPage] = useState('authors');
   const [token, setToken] = useState(null);
   const client = useApolloClient();
 
+  const updateBookCacheWith = useCacheUpdate(ALL_BOOKS);
+  const updateAuthorCacheWith = useCacheUpdate(ALL_AUTHORS);
   useSubscription(BOOK_ADDED, {
     onSubscriptionData: ({ subscriptionData }) => {
-      window.alert(`book ${subscriptionData.data.bookAdded.title} was added`);
+      const addBook = subscriptionData.data.bookAdded;
+      const genres = [...addBook.genres, ''];
+      const author = addBook.author;
+      updateAuthorCacheWith(author, 'allAuthors');
+      genres.forEach((genre) => {
+        try {
+          updateBookCacheWith(addBook, 'allBooks', { author: '', genre });
+        } catch (err) {
+          if (!err.message.startsWith(`Can't find field`)) {
+            console.error(err.message);
+          }
+        }
+      });
     },
   });
 

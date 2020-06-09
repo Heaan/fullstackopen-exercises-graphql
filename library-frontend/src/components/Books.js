@@ -13,16 +13,19 @@ const Books = ({ show }) => {
     if (show) {
       allBooks({ variables: { author: '', genre } });
     }
-  }, [show, genre]);
+    if (!show) {
+      setGenre('');
+    }
+  }, [show, genre]); // eslint-disable-line
 
   useEffect(() => {
     if (data) {
       setBooks(data.allBooks);
-      if (tags.length === 0) {
+      if (genre.length === 0) {
         setTags([...new Set(data.allBooks.map((book) => book.genres).flat())]);
       }
     }
-  }, [data]);
+  }, [data]); // eslint-disable-line
 
   if (!show) {
     return null;

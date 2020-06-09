@@ -5,7 +5,11 @@ import { EDIT_AUTHOR } from '../queries';
 const UpdateForm = ({ authors }) => {
   const [name, setName] = useState('');
   const [born, setBorn] = useState('');
-  const [editAuthor] = useMutation(EDIT_AUTHOR);
+  const [editAuthor] = useMutation(EDIT_AUTHOR, {
+    onError: (err) => {
+      console.error(err.graphQLErrors[0].message);
+    },
+  });
 
   const submit = (event) => {
     event.preventDefault();
