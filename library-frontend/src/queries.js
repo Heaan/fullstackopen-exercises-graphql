@@ -17,6 +17,9 @@ export const ALL_BOOKS = gql`
       title
       author {
         name
+        born
+        bookCount
+        id
       }
       published
       id
@@ -31,6 +34,9 @@ export const ADD_BOOK = gql`
       title
       author {
         name
+        born
+        bookCount
+        id
       }
       published
       genres

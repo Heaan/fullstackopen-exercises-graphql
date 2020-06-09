@@ -9,10 +9,24 @@ const NewBook = (props) => {
   const [genre, setGenre] = useState('');
   const [genres, setGenres] = useState([]);
   const [createBook] = useMutation(ADD_BOOK, {
-    refetchQueries: [
-      { query: ALL_BOOKS, variables: { author: '', genre: '' } },
-      { query: ALL_AUTHORS },
-    ],
+    update: (store, { data: { addBook } }) => {
+      const genres = [...addBook.genres, ''];
+      genres.forEach((genre) => {
+        try {
+          const dataInStore = store.readQuery({
+            query: ALL_BOOKS,
+            variables: { author: '', genre },
+          });
+          store.writeQuery({
+            query: ALL_BOOKS,
+            variables: { author: '', genre },
+            data: { ...dataInStore, allBooks: [...dataInStore.allBooks, addBook] },
+          });
+        } catch {
+          console.log('not in cache');
+        }
+      });
+    },
   });
 
   if (!props.show) {
@@ -21,8 +35,6 @@ const NewBook = (props) => {
 
   const submit = async (event) => {
     event.preventDefault();
-
-    console.log('add book...');
 
     createBook({ variables: { title, author, published: +published, genres } });
 

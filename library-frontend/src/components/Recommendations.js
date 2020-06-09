@@ -30,25 +30,19 @@ const Recommendations = ({ show }) => {
     return null;
   }
 
-  if (user.called && user.loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!genre) {
-    return (
-      <button type="button" onClick={() => me()}>
-        刷新
-      </button>
-    );
-  }
-
   return (
     <>
       <h2>recommendations</h2>
-      <div>
-        books in your favorite genre <strong>{genre}</strong>
-      </div>
-      <BookTable books={books.data?.allBooks || []} />
+      {user.called && user.loading ? (
+        <div>Loading...</div>
+      ) : (
+        <>
+          <div>
+            books in your favorite genre <strong>{genre}</strong>
+          </div>
+          <BookTable books={books.data?.allBooks || []} />
+        </>
+      )}
     </>
   );
 };
